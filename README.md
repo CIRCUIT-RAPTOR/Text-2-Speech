@@ -1,8 +1,8 @@
 # Phoneme splicer
 
-Text to speech by stitching recorded English phonemes together. Static site: no build step, no backend.
+Text to speech by stitching recorded English phonemes together. Static site: no build step, no backend. Access live demo by clicking the link below.
 
-[![Live Demo](https://img.shields.io/badge/Live-Website-brightgreen?style=for-the-badge&logo=githubpages)](https://circuit-raptor.github.io/Text-2-Speech/)
+[![Live Demo](https://img.shields.io/badge/Live-Website-brightgreen?style=plastic&logo=githubpages)](https://circuit-raptor.github.io/Text-2-Speech/)
 
 ## Run it locally on PC
 
