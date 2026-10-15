@@ -2,7 +2,9 @@
 
 Text to speech by stitching recorded English phonemes together. Static site: no build step, no backend.
 
-## Run it
+[![Live Demo](https://img.shields.io/badge/Live-Website-brightgreen?style=for-the-badge&logo=githubpages)](https://circuit-raptor.github.io/Text-2-Speech/)
+
+## Run it locally on PC
 
 The recording is loaded with `fetch`, so open the folder through a web server (double-clicking `index.html` won't work):
 
