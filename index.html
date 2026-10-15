@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Phoneme splicer</title>
+  <meta name="description" content="Text to speech built by stitching recorded English phonemes together.">
+  <meta name="theme-color" content="#050a4a">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gentium+Plus:wght@400;700&family=Schibsted+Grotesk:wght@400;500;650&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="bg" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i></div>
+
+  <header class="top">
+    <h1>Text 2 Speech</h1>
+    <p id="status" role="status">Loading the voice…</p>
+  </header>
+
+  <main>
+    <section class="write glass">
+      <label for="text" class="sr-only">Text to speak</label>
+      <textarea id="text" rows="3" spellcheck="false">Hello, this is my phoneme stitching voice.</textarea>
+    </section>
+
+    <div class="controls">
+      <label class="voice">
+        <span class="sr-only">Voice</span>
+        <select id="voice"></select>
+      </label>
+
+      <button id="play" class="round play" type="button" aria-label="Speak" disabled>
+        <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z"/></svg>
+        <svg class="i-stop" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="6.5" width="11" height="11" rx="2.5"/></svg>
+      </button>
+
+      <div class="after-play">
+        <button id="wav" class="round small" type="button" aria-label="Download as WAV" title="Download as WAV" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v10m0 0-4-4m4 4 4-4M5 19h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <section class="tape-wrap glass" aria-label="Phonemes of the text">
+      <div id="tape" class="tape"></div>
+    </section>
+
+    <details id="tuning" class="tuning glass">
+      <summary>Tuning</summary>
+      <div class="sliders">
+        <label for="pace">Pace</label>
+        <input id="pace" type="range" min="0.5" max="2" step="0.05" data-key="pace" data-fmt="x">
+        <output for="pace"></output>
+
+        <label for="pitch">Pitch</label>
+        <input id="pitch" type="range" min="-6" max="6" step="0.5" data-key="pitch" data-fmt="st">
+        <output for="pitch"></output>
+
+        <label for="intonation">Intonation</label>
+        <input id="intonation" type="range" min="0" max="1.5" step="0.1" data-key="intonation" data-fmt="n">
+        <output for="intonation"></output>
+
+        <label for="evenness">Loudness evening</label>
+        <input id="evenness" type="range" min="0" max="1" step="0.05" data-key="evenness" data-fmt="%">
+        <output for="evenness"></output>
+
+        <label for="blend">Blend between sounds</label>
+        <input id="blend" type="range" min="0" max="40" step="2" data-key="blend">
+        <output for="blend"></output>
+
+        <label for="wordGap">Gap between words</label>
+        <input id="wordGap" type="range" min="0" max="300" step="10" data-key="wordGap">
+        <output for="wordGap"></output>
+
+        <label for="volume">Volume</label>
+        <input id="volume" type="range" min="0" max="2" step="0.05" data-key="volume" data-fmt="%">
+        <output for="volume"></output>
+      </div>
+    </details>
+
+    <section class="chart-wrap glass" aria-labelledby="chart-h">
+      <h2 id="chart-h">Phoneme chart</h2>
+      <p class="hint">Select a symbol to hear the isolated sound, or the word under it to hear the full recording.</p>
+      <div id="chart" class="chart"></div>
+    </section>
+  </main>
+
+  <footer>
+    Recording and chart layout from EnglishClub.com (Anthony Essberger). Pronunciations from the CMU Pronouncing Dictionary.
+  </footer>
+
+  <aside class="spectro glass" aria-label="Live spectrogram">
+    <canvas id="spectro"></canvas>
+    <span class="tick" style="top:6px">8k</span>
+    <span class="tick" style="top:50%">4k</span>
+    <span class="tick" style="bottom:6px">0</span>
+  </aside>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

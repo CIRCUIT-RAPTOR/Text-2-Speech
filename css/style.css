@@ -1,0 +1,336 @@
+/* Liquid glass over a slow-moving colour field.
+   Surfaces are translucent, blurred, with a bright rim and a soft specular sheen. */
+
+:root {
+  --ink: #fff;
+  --ink-dim: rgb(255 255 255 / 0.74);
+  --night: #050a4a;
+  --cyan: #8fe9ff;
+  --pink: #ff74ac;
+  --rim: rgb(255 255 255 / 0.3);
+  --ui: 'Schibsted Grotesk', system-ui, sans-serif;
+  --ipa: 'Gentium Plus', 'Charis SIL', 'Noto Serif', 'DejaVu Serif', serif;
+  --spectro-h: 132px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  padding-bottom: calc(var(--spectro-h) + 56px);          /* room for the floating spectrogram */
+  background: var(--night);
+  color: var(--ink);
+  font: 400 16px/1.5 var(--ui);
+  text-shadow: 0 1px 2px rgb(0 10 70 / 0.35);
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+/* ------------------------------------------------------------- background */
+
+.bg {
+  position: fixed; inset: 0; z-index: -1; overflow: hidden;
+  background: radial-gradient(130% 100% at 15% 90%, #0b24b0 0%, #07105f 45%, #030623 100%);
+}
+.bg i {
+  position: absolute; border-radius: 50%; filter: blur(80px); will-change: transform;
+}
+.b1 { width: 70vmax; height: 46vmax; left: -14vmax; top: 18vh;
+      background: radial-gradient(closest-side, #19b9f0, transparent); opacity: 0.85;
+      animation: drift-a 42s ease-in-out infinite alternate; }
+.b2 { width: 56vmax; height: 30vmax; left: 22vw; top: -8vh;
+      background: radial-gradient(closest-side, #d6f1fb, transparent); opacity: 0.5;
+      animation: drift-b 55s ease-in-out infinite alternate; }
+.b3 { width: 40vmax; height: 40vmax; right: -12vmax; top: -10vmax;
+      background: radial-gradient(closest-side, #ffa95a, transparent); opacity: 0.62;
+      animation: drift-c 48s ease-in-out infinite alternate; }
+.b4 { width: 56vmax; height: 38vmax; right: -16vmax; bottom: -14vmax;
+      background: radial-gradient(closest-side, #d6428c, #6a3fd0 55%, transparent); opacity: 0.7;
+      animation: drift-d 60s ease-in-out infinite alternate; }
+
+@keyframes drift-a { to { transform: translate(14vw, -6vh) scale(1.12); } }
+@keyframes drift-b { to { transform: translate(-16vw, 10vh) scale(0.9); } }
+@keyframes drift-c { to { transform: translate(-10vw, 16vh) scale(1.15); } }
+@keyframes drift-d { to { transform: translate(-18vw, -10vh) scale(1.1); } }
+
+/* ------------------------------------------------------------------ glass */
+
+.glass {
+  position: relative;
+  border-radius: 28px;
+  background: linear-gradient(150deg, rgb(255 255 255 / 0.22), rgb(255 255 255 / 0.06) 55%, rgb(255 255 255 / 0.13));
+  -webkit-backdrop-filter: blur(22px) saturate(1.7);
+  backdrop-filter: blur(22px) saturate(1.7);
+  border: 1px solid var(--rim);
+  box-shadow:
+    inset 0 1.5px 1px rgb(255 255 255 / 0.65),
+    inset 0 -1px 1px rgb(255 255 255 / 0.14),
+    inset 0 0 26px rgb(255 255 255 / 0.07),
+    0 14px 44px rgb(2 8 70 / 0.38);
+}
+.glass::before {                                          /* specular sheen from the top-left */
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(110% 55% at 12% 0%, rgb(255 255 255 / 0.26), transparent 60%);
+}
+
+/* small glass pieces: gradient + rim only, no extra blur layer */
+.round, .voice select, .key, .tile, .word, .tuning summary, .pause {
+  background: linear-gradient(155deg, rgb(255 255 255 / 0.30), rgb(255 255 255 / 0.08));
+  border: 1px solid rgb(255 255 255 / 0.34);
+  box-shadow:
+    inset 0 1.5px 1px rgb(255 255 255 / 0.7),
+    inset 0 -1px 2px rgb(255 255 255 / 0.12),
+    0 6px 18px rgb(2 8 70 / 0.28);
+}
+
+button, select, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--cyan); outline-offset: 3px; }
+
+/* ----------------------------------------------------------------- layout */
+
+header.top, main, footer {
+  width: min(1040px, 100% - 32px);
+  margin-inline: auto;
+}
+header.top {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between;
+  gap: 4px 24px; padding: 28px 0 8px;
+}
+h1 { margin: 0; font-size: 1.3rem; font-weight: 650; letter-spacing: -0.01em; }
+#status { margin: 0; font-size: 0.875rem; color: var(--ink-dim); }
+.failed #status { color: #ffd0d8; font-weight: 500; }
+
+main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; padding-top: 14px; }   /* minmax: the phoneme strip must scroll, not widen the page */
+h2 { margin: 0 0 6px; font-size: 1.05rem; font-weight: 650; }
+
+/* ------------------------------------------------------------------ write */
+
+.write { padding: 10px 12px; }
+textarea {
+  display: block; width: 100%; resize: vertical; min-height: 96px;
+  padding: 10px 14px; border: 0; border-radius: 20px; background: transparent;
+  font-size: clamp(1.25rem, 2.2vw + 0.8rem, 1.75rem); line-height: 1.35;
+  caret-color: var(--cyan);
+}
+textarea:focus-visible { outline-offset: -2px; }
+
+/* --------------------------------------------------------------- controls */
+
+.controls {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px;
+}
+.voice { justify-self: start; position: relative; }
+.voice select {
+  appearance: none; -webkit-appearance: none;
+  padding: 11px 42px 11px 18px; border-radius: 999px; min-width: 150px;
+  font-weight: 500; cursor: pointer;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"),
+    linear-gradient(155deg, rgb(255 255 255 / 0.30), rgb(255 255 255 / 0.08));
+  background-repeat: no-repeat, no-repeat;
+  background-position: right 14px center, 0 0;
+  background-size: 16px, auto;
+}
+.voice option { color: #0a1450; background: #fff; text-shadow: none; }
+
+.round {
+  display: grid; place-items: center; border-radius: 50%; padding: 0; color: #fff;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
+}
+.round svg { fill: currentColor; }
+.round:hover:not(:disabled) { transform: translateY(-1px) scale(1.04); }
+.round:active:not(:disabled) { transform: scale(0.97); }
+.round:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.play {
+  width: 76px; height: 76px;
+  background: linear-gradient(155deg, rgb(160 235 255 / 0.62), rgb(60 130 255 / 0.32));
+  box-shadow:
+    inset 0 2px 1px rgb(255 255 255 / 0.8),
+    inset 0 -2px 4px rgb(120 200 255 / 0.3),
+    0 0 0 1px rgb(255 255 255 / 0.2),
+    0 10px 34px rgb(40 140 255 / 0.5);
+}
+.play svg { width: 32px; height: 32px; }
+.play .i-play { margin-left: 3px; }
+.play .i-stop { display: none; }
+.play.playing .i-play { display: none; }
+.play.playing .i-stop { display: block; }
+.play.playing {
+  background: linear-gradient(155deg, rgb(255 190 215 / 0.62), rgb(255 90 150 / 0.34));
+  box-shadow:
+    inset 0 2px 1px rgb(255 255 255 / 0.8),
+    inset 0 -2px 4px rgb(255 140 180 / 0.3),
+    0 0 0 1px rgb(255 255 255 / 0.2),
+    0 10px 34px rgb(255 90 150 / 0.5);
+}
+
+.after-play { justify-self: start; }
+.round.small { width: 50px; height: 50px; }
+.round.small svg { width: 24px; height: 24px; fill: none; }
+
+/* ------------------------------------------------------------------- tape */
+
+.tape-wrap { padding: 6px 0; }
+
+/* A sliding window: one row of words that scrolls sideways. The spacers let the first and
+   last words reach the middle; the mask fades the edges. */
+.tape {
+  position: relative;
+  display: flex; flex-wrap: nowrap; align-items: flex-end; gap: 12px;
+  min-height: 132px; padding: 22px 0 20px;
+  overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 11%, #000 89%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 11%, #000 89%, transparent);
+}
+.tape::-webkit-scrollbar { display: none; }
+.tape::before, .tape::after { content: ''; flex: 0 0 46%; }
+.empty { flex: none; margin: auto 0; color: var(--ink-dim); white-space: nowrap; }
+
+.word {
+  flex: none; display: flex; flex-direction: column; gap: 4px;
+  padding: 8px 12px 10px; border-radius: 22px;
+  transition: transform 0.25s, background 0.25s, box-shadow 0.25s, border-color 0.25s;
+}
+.word.live {                                              /* the word being spoken: a lit pane of glass */
+  transform: translateY(-4px);
+  background: linear-gradient(155deg, rgb(255 255 255 / 0.5), rgb(190 235 255 / 0.2));
+  border-color: rgb(255 255 255 / 0.85);
+  box-shadow:
+    inset 0 2px 1px rgb(255 255 255 / 0.9),
+    0 0 0 3px rgb(255 255 255 / 0.18),
+    0 0 36px rgb(130 220 255 / 0.65),
+    0 12px 28px rgb(2 8 70 / 0.35);
+}
+.spelling { padding-inline: 4px; font-size: 0.8125rem; color: var(--ink-dim); }
+.word.guessed .spelling { font-style: italic; text-decoration: underline dotted; text-underline-offset: 3px; }
+.phonemes { display: flex; gap: 4px; }
+
+.tile, .key { font-family: var(--ipa); line-height: 1; color: #fff; text-shadow: 0 1px 3px rgb(0 10 80 / 0.5); }
+.vowel, .diphthong {
+  background: linear-gradient(155deg, rgb(170 215 255 / 0.55), rgb(70 130 255 / 0.26));
+}
+.consonant {
+  background: linear-gradient(155deg, rgb(255 224 150 / 0.78), rgb(255 150 70 / 0.42));
+}
+
+.tile {
+  min-width: 36px; padding: 7px 8px 8px; border-radius: 14px; font-size: 1.875rem;
+  transition: transform 0.15s, background 0.15s, box-shadow 0.15s, color 0.15s;
+}
+.tile:hover { transform: translateY(-1px); }
+.tile.live {                                              /* the sound being played right now */
+  transform: translateY(-3px) scale(1.07);
+  background: linear-gradient(160deg, #fff, #c8e8ff);
+  color: #0a1f6e; text-shadow: none;
+  box-shadow:
+    inset 0 -3px 0 var(--pink),
+    0 0 0 2px rgb(255 255 255 / 0.9),
+    0 0 26px 4px rgb(140 225 255 / 0.85);
+}
+
+.pause {
+  flex: none; align-self: flex-end; min-width: 26px; padding: 2px 8px 5px; margin-bottom: 8px;
+  border-radius: 999px; text-align: center; font-size: 1.1rem; color: var(--ink-dim);
+}
+
+/* ----------------------------------------------------------------- tuning */
+
+.tuning { padding: 12px 16px; }
+.tuning summary {
+  display: inline-block; padding: 7px 18px; border-radius: 999px;
+  font-weight: 650; cursor: pointer; list-style: none;
+}
+.tuning summary::-webkit-details-marker { display: none; }
+.sliders {
+  display: grid; grid-template-columns: minmax(150px, 220px) minmax(120px, 340px) 70px;
+  align-items: center; gap: 12px 18px; margin: 18px 6px 8px; font-size: 0.9375rem;
+}
+.sliders output { font-variant-numeric: tabular-nums; color: var(--ink-dim); }
+
+input[type=range] {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 999px;
+  background: rgb(255 255 255 / 0.28); box-shadow: inset 0 1px 2px rgb(0 10 80 / 0.35);
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; border: 0;
+  background: radial-gradient(circle at 35% 30%, #fff, #b9e3ff);
+  box-shadow: 0 2px 10px rgb(0 10 90 / 0.5), 0 0 0 1px rgb(255 255 255 / 0.8);
+}
+input[type=range]::-moz-range-thumb {
+  width: 22px; height: 22px; border-radius: 50%; border: 0;
+  background: radial-gradient(circle at 35% 30%, #fff, #b9e3ff);
+  box-shadow: 0 2px 10px rgb(0 10 90 / 0.5), 0 0 0 1px rgb(255 255 255 / 0.8);
+}
+
+/* ------------------------------------------------------------------ chart */
+
+.chart-wrap { padding: 24px 24px 28px; }
+.hint { margin: 0 0 20px; color: var(--ink-dim); font-size: 0.9375rem; }
+
+.vowels { display: grid; grid-template-columns: 4fr 3fr; gap: 0 32px; margin-bottom: 30px; }
+.group.diph { padding-left: 32px; border-left: 1px solid rgb(255 255 255 / 0.28); }
+h3 { margin: 0 0 12px; font-size: 0.9375rem; font-weight: 650; }
+
+.grid { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: 16px 10px; }
+.cell { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-height: 1px; }
+
+.key {
+  width: 100%; max-width: 78px; aspect-ratio: 1; border-radius: 22px; font-size: 2rem;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.key:hover { transform: translateY(-2px); box-shadow: inset 0 1.5px 1px rgb(255 255 255 / 0.8), 0 10px 24px rgb(2 8 70 / 0.35); }
+.key:active { transform: scale(0.96); }
+
+.example {
+  padding: 0 2px; border: 0; background: none; text-align: left;
+  font-size: 0.875rem; color: var(--ink-dim);
+}
+.example b { color: var(--cyan); font-weight: 700; }
+.example:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+footer { margin-block: 32px 0; font-size: 0.8125rem; color: var(--ink-dim); max-width: 70ch; }
+
+/* ------------------------------------------------- floating spectrogram */
+
+.spectro {
+  position: fixed; z-index: 20; left: 50%; bottom: 14px; transform: translateX(-50%);
+  width: min(980px, calc(100% - 24px)); height: var(--spectro-h);
+  border-radius: 26px; overflow: hidden;
+}
+.spectro canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.spectro .tick {
+  position: absolute; left: 14px; font-size: 0.6875rem; color: rgb(255 255 255 / 0.6);
+  pointer-events: none; z-index: 1;
+}
+
+/* ----------------------------------------------------------------- phones */
+
+@media (max-width: 760px) {
+  :root { --spectro-h: 104px; }
+  .vowels { grid-template-columns: 1fr; gap: 28px; }
+  .group.diph { padding-left: 0; border-left: 0; }
+  .group.cons .grid { --cols: 4; }
+  .chart-wrap { padding: 20px 16px 24px; }
+  .sliders { grid-template-columns: 1fr 64px; }
+  .sliders label { grid-column: 1 / -1; margin-bottom: -6px; }
+  .controls { grid-template-columns: auto auto; justify-content: center; }
+  .voice { grid-column: 1 / -1; justify-self: stretch; }
+  .voice select { width: 100%; }
+  .tile { min-width: 30px; padding: 6px 6px 7px; font-size: 1.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg i { animation: none; }
+  * { transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* browsers without backdrop-filter get a more opaque pane so text stays legible */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass { background: rgb(20 40 130 / 0.72); }
+}
