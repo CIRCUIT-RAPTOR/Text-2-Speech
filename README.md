@@ -19,7 +19,7 @@ python -m http.server
 1. `js/g2p.js` splits the text into words and pauses, looks each word up in the CMU Pronouncing Dictionary (`data/cmudict.txt`), and guesses unknown words from spelling rules (shown with a dotted underline). ARPABET is converted to the 44 chart phonemes, British-style by default.
 2. `js/sprites.js` is the sprite table copied from EnglishClub's `activity.js`. `"21_1": [60000, 261]` means phoneme 21 (p) starts at 60 s and is 261 ms long; `_2` is its example word.
 3. `js/engine.js` prepares every clip once when a voice loads, then `synthesize()` turns phonemes into one waveform:
-   - **Consonant tails cut off.** Every consonant was recorded as "consonant + uh". Each one is cut where the vowel begins (found automatically; `CUT_MS` in `js/phonemes.js` overrides it for b, g and ʤ, where the automatic estimate was wrong). This removes the "dogu" sound.
+   - **Consonant tails cut off.** Every consonant was recorded as "consonant + uh". Each one is cut where the vowel begins (found automatically; `CUT_MS` in `js/phonemes.js` overrides it for b, g and ʤ, where the automatic estimate was wrong).
    - **Pitch evened out.** Voiced sounds are re-pitched with PSOLA (`js/dsp.js`) to the voice's own median pitch, then given a gentle intonation: a fall across each phrase, a small lift on stressed vowels, a rise for questions.
    - **Level evened out.** Each class is set to a target level (`LEVEL_DB`), then a smoothed gain curve evens out the whole utterance and the peak is normalised.
    - Playback and WAV export use the same finished waveform.
