@@ -1,4 +1,4 @@
-# Phoneme splicer
+# Text 2 Speech
 
 Text to speech by stitching recorded English phonemes together. Static site: no build step, no backend. Access live demo by clicking the link below.
 
