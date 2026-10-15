@@ -11,7 +11,6 @@ python -m http.server
 # then open http://localhost:8000
 ```
 
-To host on GitHub: push the folder and turn on Pages (Settings, Pages, deploy from the `main` branch root).
 
 ## How it works
 
@@ -43,4 +42,4 @@ Regenerate the dictionary with `node tools/build-dict.mjs` after `npm install cm
 
 ## Credits and licensing
 
-The recording and chart layout come from EnglishClub.com (Anthony Essberger). Check you have permission before publishing the audio publicly; recording your own phonemes in the same layout avoids the question. Pronunciations: CMU Pronouncing Dictionary (BSD-style licence).
+The recording and chart layout come from EnglishClub.com (Anthony Essberger). Pronunciations: CMU Pronouncing Dictionary (BSD-style licence).
